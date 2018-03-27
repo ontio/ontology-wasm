@@ -9,7 +9,7 @@ import (
 	"io"
 	"testing"
 
-	"github.com/ONTIO/Ontology-wasm/wasm/internal/readpos"
+	"github.com/ontio/ontology-wasm/wasm/internal/readpos"
 )
 
 func TestRead(t *testing.T) {

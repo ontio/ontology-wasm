@@ -8,8 +8,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/ONTIO/Ontology-wasm/wasm"
-	ops "github.com/ONTIO/Ontology-wasm/wasm/operators"
+	"github.com/ontio/ontology-wasm/wasm"
+	ops "github.com/ontio/ontology-wasm/wasm/operators"
 )
 
 type Error struct {

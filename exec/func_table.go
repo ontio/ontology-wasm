@@ -5,7 +5,7 @@
 package exec
 
 import (
-	ops "github.com/ONTIO/Ontology-wasm/wasm/operators"
+	ops "github.com/ontio/ontology-wasm/wasm/operators"
 )
 
 func (vm *VM) newFuncTable() {

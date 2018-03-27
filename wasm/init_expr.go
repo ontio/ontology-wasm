@@ -11,7 +11,7 @@ import (
 	"io"
 	"math"
 
-	"github.com/ONTIO/Ontology-wasm/wasm/leb128"
+	"github.com/ontio/ontology-wasm/wasm/leb128"
 )
 
 const (
@@ -146,8 +146,8 @@ func (m *Module) ExecInitExpr(expr []byte) (interface{}, error) {
 			}
 			lastVal = globalVar.Type.Type
 			//for env global
-			if globalVar.IsEnv{
-				stack = append(stack ,globalVar.InitVal)
+			if globalVar.IsEnv {
+				stack = append(stack, globalVar.InitVal)
 			}
 		case end:
 			break

@@ -9,8 +9,8 @@ import (
 	"bytes"
 	"io"
 
-	"github.com/ONTIO/Ontology-wasm/wasm"
-	ops "github.com/ONTIO/Ontology-wasm/wasm/operators"
+	"github.com/ontio/ontology-wasm/wasm"
+	ops "github.com/ontio/ontology-wasm/wasm/operators"
 )
 
 // vibhavp: TODO: We do not verify whether blocks don't access for the parent block, do that.

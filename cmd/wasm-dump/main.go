@@ -14,9 +14,9 @@ import (
 	"os"
 	"sort"
 
-	"github.com/ONTIO/Ontology-wasm/disasm"
-	"github.com/ONTIO/Ontology-wasm/wasm"
-	"github.com/ONTIO/Ontology-wasm/wasm/leb128"
+	"github.com/ontio/ontology-wasm/disasm"
+	"github.com/ontio/ontology-wasm/wasm"
+	"github.com/ontio/ontology-wasm/wasm/leb128"
 )
 
 // TODO: track the number of imported funcs,memories,tables and globals to adjust

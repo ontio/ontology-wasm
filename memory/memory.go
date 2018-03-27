@@ -21,9 +21,9 @@ package memory
 import (
 	"encoding/binary"
 	"errors"
-	"github.com/ONTIO/Ontology-wasm/util"
-	"reflect"
+	"github.com/ontio/ontology-wasm/util"
 	"math"
+	"reflect"
 )
 
 type P_Type int
@@ -98,7 +98,7 @@ func (vm *VMmemory) copyMemAndGetIdx(b []byte, p_type P_Type) (int, error) {
 
 func (vm *VMmemory) GetPointerMemSize(addr uint64) int {
 	//nil case
-	if addr == uint64(math.MaxInt64){
+	if addr == uint64(math.MaxInt64) {
 		return 0
 	}
 
@@ -113,8 +113,8 @@ func (vm *VMmemory) GetPointerMemSize(addr uint64) int {
 //when wasm returns a pointer, call this function to get the pointed memory
 func (vm *VMmemory) GetPointerMemory(addr uint64) ([]byte, error) {
 	//nil case
-	if addr == uint64(math.MaxInt64){
-		return nil,nil
+	if addr == uint64(math.MaxInt64) {
+		return nil, nil
 	}
 
 	length := vm.GetPointerMemSize(addr)
@@ -227,8 +227,8 @@ func (vm *VMmemory) SetStructMemory(val interface{}) (int, error) {
 			case reflect.String:
 				fieldVal = field.String()
 				tmp, err := vm.SetPointerMemory(fieldVal)
-				if err != nil{
-					return 0,err
+				if err != nil {
+					return 0, err
 				}
 				//add the point address to memory
 				idx, err = vm.SetMemory(tmp)
@@ -237,8 +237,8 @@ func (vm *VMmemory) SetStructMemory(val interface{}) (int, error) {
 				//fieldVal = field.Interface()
 				//TODO note the struct field MUST be public
 				tmp, err := vm.SetPointerMemory(fieldVal)
-				if err != nil{
-					return 0,err
+				if err != nil {
+					return 0, err
 				}
 				//add the point address to memory
 				idx, err = vm.SetMemory(tmp)
@@ -262,13 +262,13 @@ func (vm *VMmemory) SetMemory(val interface{}) (int, error) {
 	switch val.(type) {
 	case string: //use SetPointerMemory for string
 		return vm.SetPointerMemory(val.(string))
-/*		b := []byte(val.(string))
-		idx, err := vm.Malloc(len(b))
-		if err != nil {
-			return 0, err
-		}
-		copy(vm.Memory[idx:idx+len(b)], b)
-		return idx, nil*/
+		/*		b := []byte(val.(string))
+				idx, err := vm.Malloc(len(b))
+				if err != nil {
+					return 0, err
+				}
+				copy(vm.Memory[idx:idx+len(b)], b)
+				return idx, nil*/
 	case int:
 		tmp := make([]byte, 4)
 		binary.LittleEndian.PutUint32(tmp, uint32(val.(int)))

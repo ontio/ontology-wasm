@@ -12,10 +12,10 @@ import (
 	"io"
 	"math"
 
-	"github.com/ONTIO/Ontology-wasm/internal/stack"
-	"github.com/ONTIO/Ontology-wasm/wasm"
-	"github.com/ONTIO/Ontology-wasm/wasm/leb128"
-	ops "github.com/ONTIO/Ontology-wasm/wasm/operators"
+	"github.com/ontio/ontology-wasm/internal/stack"
+	"github.com/ontio/ontology-wasm/wasm"
+	"github.com/ontio/ontology-wasm/wasm/leb128"
+	ops "github.com/ontio/ontology-wasm/wasm/operators"
 )
 
 // Instr describes an instruction, consisting of an operator, with its

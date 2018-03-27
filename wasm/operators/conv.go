@@ -7,7 +7,7 @@ package operators
 import (
 	"regexp"
 
-	"github.com/ONTIO/Ontology-wasm/wasm"
+	"github.com/ontio/ontology-wasm/wasm"
 )
 
 var reCvrtOp = regexp.MustCompile(`(.+)\.(?:[a-z]|\_)+\/(.+)`)

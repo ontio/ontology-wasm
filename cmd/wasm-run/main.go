@@ -10,9 +10,9 @@ import (
 	"log"
 	"os"
 
-	"github.com/ONTIO/Ontology-wasm/exec"
-	"github.com/ONTIO/Ontology-wasm/validate"
-	"github.com/ONTIO/Ontology-wasm/wasm"
+	"github.com/ontio/ontology-wasm/exec"
+	"github.com/ontio/ontology-wasm/validate"
+	"github.com/ontio/ontology-wasm/wasm"
 )
 
 func main() {

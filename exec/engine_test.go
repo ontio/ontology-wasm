@@ -21,31 +21,23 @@ package exec
 import (
 	"encoding/binary"
 	"fmt"
-	"github.com/Ontology/common"
+	"github.com/ontio/ontology-wasm/util"
 	"io/ioutil"
-	"testing"
 	"math"
-	"github.com/ONTIO/Ontology-wasm/util"
-
+	"testing"
 )
 
 var service = NewInteropService()
 
 func TestAdd(t *testing.T) {
-	engine := NewExecutionEngine(nil,nil,nil,nil,"test")
+	engine := NewExecutionEngine(nil, "test")
 
 	code, err := ioutil.ReadFile("./testdata2/math.wasm")
 	if err != nil {
 		fmt.Println("error in read file", err.Error())
 		return
 	}
-	fmt.Printf("code bytes:%v\n", code)
-	codestring := common.ToHexString(code)
 
-	fmt.Println(codestring)
-
-	b, _ := common.HexToBytes(codestring)
-	fmt.Println(b)
 	method2 := "add"
 	input2 := make([]byte, 9)
 	input2[0] = byte(len(method2))
@@ -57,7 +49,7 @@ func TestAdd(t *testing.T) {
 	input2[len(method2)+5] = byte(9) //param2
 
 	fmt.Println(input2)
-	res2, err := engine.Call(common.Address{}, code, input2)
+	res2, err := engine.Call(nil, code, input2)
 	if err != nil {
 		fmt.Println("call error!", err.Error())
 	}
@@ -69,7 +61,7 @@ func TestAdd(t *testing.T) {
 }
 
 func TestSquare(t *testing.T) {
-	engine := NewExecutionEngine(nil,nil,nil,nil,"test")
+	engine := NewExecutionEngine(nil, "test")
 
 	code, err := ioutil.ReadFile("./testdata2/math.wasm")
 	if err != nil {
@@ -86,7 +78,7 @@ func TestSquare(t *testing.T) {
 	input[len(method)+3] = byte(5) //param1
 
 	fmt.Println(input)
-	res, err := engine.Call(common.Address{}, code, input)
+	res, err := engine.Call(nil, code, input)
 	if err != nil {
 		fmt.Println("call error!", err.Error())
 	}
@@ -101,13 +93,13 @@ func TestEnvAddTwo(t *testing.T) {
 
 	service.Register("addOne", func(engine *ExecutionEngine) (bool, error) {
 		fmt.Println(engine)
-		param:= engine.vm.envCall.envParams[0]
+		param := engine.vm.envCall.envParams[0]
 		engine.vm.ctx = engine.vm.envCall.envPreCtx
-		engine.vm.pushUint64(param+1)
-		return true,nil
+		engine.vm.pushUint64(param + 1)
+		return true, nil
 	})
 
-	engine := NewExecutionEngine(nil,nil,nil,service,"test")
+	engine := NewExecutionEngine(service, "test")
 
 	code, err := ioutil.ReadFile("./testdata2/testenv.wasm")
 	if err != nil {
@@ -121,7 +113,7 @@ func TestEnvAddTwo(t *testing.T) {
 	copy(input[1:len(method)+1], []byte(method))
 	input[len(method)+1] = byte(0)
 
-	res, err := engine.Call(common.Address{}, code, input)
+	res, err := engine.Call(nil, code, input)
 	if err != nil {
 		fmt.Println("call error!", err.Error())
 	}
@@ -137,11 +129,10 @@ func TestBlockHeight(t *testing.T) {
 
 		engine.vm.ctx = engine.vm.envCall.envPreCtx
 		engine.vm.pushUint64(uint64(25535))
-		return true,nil
+		return true, nil
 	})
 
-
-	engine := NewExecutionEngine(nil,nil,nil,service,"test")
+	engine := NewExecutionEngine(service, "test")
 
 	code, err := ioutil.ReadFile("./testdata2/testBlockHeight.wasm")
 	if err != nil {
@@ -155,7 +146,7 @@ func TestBlockHeight(t *testing.T) {
 	copy(input[1:len(method)+1], []byte(method))
 	input[len(method)+1] = byte(0)
 
-	res, err := engine.Call(common.Address{}, code, input)
+	res, err := engine.Call(nil, code, input)
 	if err != nil {
 		fmt.Println("call error!", err.Error())
 	}
@@ -177,11 +168,11 @@ func TestMem(t *testing.T) {
 		str := string(mem[start : start+length])
 		engine.vm.ctx = engine.vm.envCall.envPreCtx
 		engine.vm.pushUint64(uint64(len(str)))
-		return true,nil
+		return true, nil
 
 	})
 
-	engine := NewExecutionEngine(nil,nil,nil,service,"test")
+	engine := NewExecutionEngine(service, "test")
 	//test
 	code, err := ioutil.ReadFile("./testdata2/TestMemory.wasm")
 	if err != nil {
@@ -195,7 +186,7 @@ func TestMem(t *testing.T) {
 	copy(input[1:len(method)+1], []byte(method))
 	input[len(method)+1] = byte(0)
 
-	res, err := engine.Call(common.Address{}, code, input)
+	res, err := engine.Call(nil, code, input)
 	if err != nil {
 		fmt.Println("call error!", err.Error())
 	}
@@ -207,7 +198,7 @@ func TestMem(t *testing.T) {
 }
 
 func TestGlobal(t *testing.T) {
-	engine := NewExecutionEngine(nil,nil,nil,nil,"test")
+	engine := NewExecutionEngine(nil, "test")
 	//test
 	code, err := ioutil.ReadFile("./testdata2/str.wasm")
 	if err != nil {
@@ -221,7 +212,7 @@ func TestGlobal(t *testing.T) {
 	copy(input[1:len(method)+1], []byte(method))
 	input[len(method)+1] = byte(0)
 
-	res, err := engine.Call(common.Address{}, code, input)
+	res, err := engine.Call(nil, code, input)
 	if err != nil {
 		fmt.Println("call error!", err.Error())
 	}
@@ -230,9 +221,8 @@ func TestGlobal(t *testing.T) {
 
 }
 
-
 func TestIf(t *testing.T) {
-	engine := NewExecutionEngine(nil,nil,nil,nil,"test")
+	engine := NewExecutionEngine(nil, "test")
 	//test
 	code, err := ioutil.ReadFile("./testdata2/ifTest.wasm")
 	if err != nil {
@@ -249,7 +239,7 @@ func TestIf(t *testing.T) {
 	input[len(method)+2] = byte(1)
 	input[len(method)+3] = byte(p)
 
-	res, err := engine.Call(common.Address{}, code, input)
+	res, err := engine.Call(nil, code, input)
 	if err != nil {
 		fmt.Println("call error!", err.Error())
 	}
@@ -270,7 +260,7 @@ func TestIf(t *testing.T) {
 }
 
 func TestLoop(t *testing.T) {
-	engine := NewExecutionEngine(nil,nil,nil,nil,"test")
+	engine := NewExecutionEngine(nil, "test")
 	//test
 	code, err := ioutil.ReadFile("./testdata2/ifTest.wasm")
 	if err != nil {
@@ -287,7 +277,7 @@ func TestLoop(t *testing.T) {
 	input[len(method)+2] = byte(1)
 	input[len(method)+3] = byte(p)
 
-	res, err := engine.Call(common.Address{}, code, input)
+	res, err := engine.Call(nil, code, input)
 	if err != nil {
 		fmt.Println("call error!", err.Error())
 	}
@@ -301,7 +291,7 @@ func TestLoop(t *testing.T) {
 }
 
 func TestWhileLoop(t *testing.T) {
-	engine := NewExecutionEngine(nil,nil,nil,nil,"test")
+	engine := NewExecutionEngine(nil, "test")
 	//test
 	code, err := ioutil.ReadFile("./testdata2/ifTest.wasm")
 	if err != nil {
@@ -318,7 +308,7 @@ func TestWhileLoop(t *testing.T) {
 	input[len(method)+2] = byte(1)
 	input[len(method)+3] = byte(p)
 
-	res, err := engine.Call(common.Address{}, code, input)
+	res, err := engine.Call(nil, code, input)
 	if err != nil {
 		fmt.Println("call error!", err.Error())
 	}
@@ -342,7 +332,7 @@ func TestIfII(t *testing.T) {
 	fmt.Println(b)
 
 	fmt.Println(u)
-	engine := NewExecutionEngine(nil,nil,nil,nil,"test")
+	engine := NewExecutionEngine(nil, "test")
 	//test
 	code, err := ioutil.ReadFile("./testdata2/ifTest.wasm")
 	if err != nil {
@@ -359,7 +349,7 @@ func TestIfII(t *testing.T) {
 	input[len(method)+2] = byte(1)
 	input[len(method)+3] = byte(p)
 
-	res, err := engine.Call(common.Address{}, code, input)
+	res, err := engine.Call(nil, code, input)
 	if err != nil {
 		fmt.Println("call error!", err.Error())
 	}
@@ -372,56 +362,8 @@ func TestIfII(t *testing.T) {
 
 }
 
-func TestUI256Addr(t *testing.T) {
-	engine := NewExecutionEngine(nil,nil,nil,nil,"test")
-	//test
-	code, err := ioutil.ReadFile("./testdata2/ui256Test.wasm")
-	if err != nil {
-		fmt.Println("error in read file", err.Error())
-		return
-	}
-	method := "getAddress"
-
-	input := make([]byte, 100)
-	input[0] = byte(len(method))
-	copy(input[1:len(method)+1], []byte(method))
-	input[len(method)+1] = byte(4)
-	input[len(method)+2] = byte(8)
-	input[len(method)+3] = byte(8)
-	input[len(method)+4] = byte(8)
-	input[len(method)+5] = byte(8)
-
-	s := "abcdefghijklmnopqrstuvwxyz123456"
-	bytes := []byte(s)
-	u256, _ := common.Uint256ParseFromBytes(bytes)
-
-	fmt.Println(u256.ToString())
-
-	copy(input[len(method)+6:], bytes)
-
-	fmt.Printf("bytes is %v\n", bytes)
-	//fmt.Printf("before call ,vm.mem len is %d\n", len(engine.vm.memory.Memory))
-	res, err := engine.Call(common.Address{}, code, input)
-	if err != nil {
-		fmt.Println("call error!", err.Error())
-	}
-	fmt.Printf("res:%v\n", res)
-	fmt.Println(engine.vm.memory)
-	addr, _ := common.Uint256ParseFromBytes(engine.vm.memory.Memory[:32])
-	fmt.Printf("after bytes:%v\n", engine.vm.memory.Memory[:32])
-	fmt.Println("afterf:", addr.ToString())
-	if addr.ToString() != u256.ToString() {
-		t.Fatal("the address before is not same as after!")
-	}
-
-	if binary.LittleEndian.Uint32(res) != uint32(0) {
-		t.Error("the result should be 0")
-	}
-}
-
-
 func TestStrings(t *testing.T) {
-	engine := NewExecutionEngine(nil,nil,nil,nil,"test")
+	engine := NewExecutionEngine(nil, "test")
 	//test
 	code, err := ioutil.ReadFile("./testdata2/strings.wasm")
 	if err != nil {
@@ -436,13 +378,13 @@ func TestStrings(t *testing.T) {
 
 	fmt.Printf("input is %v\n", input)
 
-	res, err := engine.CallInf(common.Address{}, code, input,nil)
+	res, err := engine.CallInf(nil, code, input, nil)
 	if err != nil {
 		fmt.Println("call error!", err.Error())
 	}
 	fmt.Printf("res:%v\n", res)
 	fmt.Println(string(res))
-	if binary.LittleEndian.Uint32(res) != 26{
+	if binary.LittleEndian.Uint32(res) != 26 {
 		t.Fatal("the res should be 26")
 	}
 	//fmt.Println(engine.memory)
@@ -450,14 +392,13 @@ func TestStrings(t *testing.T) {
 }
 
 func TestIntArraySum(t *testing.T) {
-	engine := NewExecutionEngine(nil,nil,nil,nil,"test")
+	engine := NewExecutionEngine(nil, "test")
 	//test
 	code, err := ioutil.ReadFile("./testdata2/intarray.wasm")
 	if err != nil {
 		fmt.Println("error in read file", err.Error())
 		return
 	}
-
 
 	input := make([]interface{}, 3)
 	input[0] = "_sum"
@@ -466,13 +407,13 @@ func TestIntArraySum(t *testing.T) {
 
 	fmt.Printf("input is %v\n", input)
 
-	res, err := engine.CallInf(common.Address{}, code, input,nil)
+	res, err := engine.CallInf(nil, code, input, nil)
 	if err != nil {
 		fmt.Println("call error!", err.Error())
 	}
 	fmt.Printf("res:%v\n", res)
 	idx := int(binary.LittleEndian.Uint32(res))
-	fmt.Println(engine.GetMemory().Memory[idx:idx+10])
+	fmt.Println(engine.GetMemory().Memory[idx : idx+10])
 	if binary.LittleEndian.Uint32(res) != 10 {
 		t.Fatal("the res should be 10")
 	}
@@ -480,9 +421,8 @@ func TestIntArraySum(t *testing.T) {
 
 }
 
-
 func TestSimplestruct(t *testing.T) {
-	engine := NewExecutionEngine(nil,nil,nil,nil,"test")
+	engine := NewExecutionEngine(nil, "test")
 	//test
 	code, err := ioutil.ReadFile("./testdata2/simplestruct.wasm")
 	if err != nil {
@@ -490,14 +430,13 @@ func TestSimplestruct(t *testing.T) {
 		return
 	}
 
-	type student struct{
+	type student struct {
 		name string
 		math int
-		eng int64
-
+		eng  int64
 	}
 
-	s := student{name:"jack",math:90,eng:95}
+	s := student{name: "jack", math: 90, eng: 95}
 
 	input := make([]interface{}, 2)
 	input[0] = "getSum"
@@ -505,7 +444,7 @@ func TestSimplestruct(t *testing.T) {
 
 	fmt.Printf("input is %v\n", input)
 
-	res, err := engine.CallInf(common.Address{}, code, input,nil)
+	res, err := engine.CallInf(nil, code, input, nil)
 	if err != nil {
 		fmt.Println("call error!", err.Error())
 	}
@@ -515,12 +454,10 @@ func TestSimplestruct(t *testing.T) {
 		t.Fatal("the res should be 185")
 	}
 
-
 }
 
-
 func TestSimplestruct2(t *testing.T) {
-	engine := NewExecutionEngine(nil,nil,nil,nil,"test")
+	engine := NewExecutionEngine(nil, "test")
 	//test
 	code, err := ioutil.ReadFile("./testdata2/simplestruct.wasm")
 	if err != nil {
@@ -528,14 +465,13 @@ func TestSimplestruct2(t *testing.T) {
 		return
 	}
 
-	type student struct{
+	type student struct {
 		name string
 		math int
-		eng int64
-
+		eng  int64
 	}
 
-	s := student{name:"jack",math:90,eng:95}
+	s := student{name: "jack", math: 90, eng: 95}
 
 	input := make([]interface{}, 2)
 	input[0] = "getName"
@@ -543,29 +479,28 @@ func TestSimplestruct2(t *testing.T) {
 
 	fmt.Printf("input is %v\n", input)
 
-	res, err := engine.CallInf(common.Address{}, code, input,nil)
+	res, err := engine.CallInf(nil, code, input, nil)
 	if err != nil {
 		fmt.Println("call error!", err.Error())
 	}
 	fmt.Printf("res:%v\n", res)
-	idx:=int(binary.LittleEndian.Uint32(res))
-	fmt.Println(engine.vm.memory.Memory[idx:idx+20])
+	idx := int(binary.LittleEndian.Uint32(res))
+	fmt.Println(engine.vm.memory.Memory[idx : idx+20])
 	var length int
-	for i := idx;engine.vm.memory.Memory[i]!= 0;i++{
+	for i := idx; engine.vm.memory.Memory[i] != 0; i++ {
 		length += 1
 	}
-	if string(engine.vm.memory.Memory[idx:idx+length]) != "jack"{
+	if string(engine.vm.memory.Memory[idx:idx+length]) != "jack" {
 		t.Fatal("the res should be jack")
 	}
-/*	if binary.LittleEndian.Uint32(res) != 185 {
+	/*	if binary.LittleEndian.Uint32(res) != 185 {
 		t.Fatal("the res should be 185")
 	}*/
-
 
 }
 
 func TestComplexstruct(t *testing.T) {
-	engine := NewExecutionEngine(nil,nil,nil,nil,"test")
+	engine := NewExecutionEngine(nil, "test")
 	//test
 	code, err := ioutil.ReadFile("./testdata2/complexStruct.wasm")
 	if err != nil {
@@ -573,13 +508,12 @@ func TestComplexstruct(t *testing.T) {
 		return
 	}
 
-	type acct struct{
+	type acct struct {
 		Acct1 []int
 		Acct2 []int
-
 	}
 
-	s := acct{Acct1:[]int{10,20,30,40}}
+	s := acct{Acct1: []int{10, 20, 30, 40}}
 
 	input := make([]interface{}, 3)
 	input[0] = "sumAcct1"
@@ -588,28 +522,27 @@ func TestComplexstruct(t *testing.T) {
 
 	fmt.Printf("input is %v\n", input)
 
-	res, err := engine.CallInf(common.Address{}, code, input,nil)
+	res, err := engine.CallInf(nil, code, input, nil)
 	if err != nil {
 		fmt.Println("call error!", err.Error())
 	}
 	fmt.Printf("res:%v\n", res)
 	fmt.Println(engine.vm.memory.Memory[:20])
-	tmp:= binary.LittleEndian.Uint32(engine.vm.memory.Memory[0:4])
-	fmt.Println(engine.vm.memory.Memory[tmp:tmp+20])
+	tmp := binary.LittleEndian.Uint32(engine.vm.memory.Memory[0:4])
+	fmt.Println(engine.vm.memory.Memory[tmp : tmp+20])
 	if binary.LittleEndian.Uint32(res) != 100 {
 		t.Fatal("the res should be 100")
 	}
 }
 
 func TestFloatSum(t *testing.T) {
-	engine := NewExecutionEngine(nil,nil,nil,nil,"test")
+	engine := NewExecutionEngine(nil, "test")
 	//test
 	code, err := ioutil.ReadFile("./testdata2/float.wasm")
 	if err != nil {
 		fmt.Println("error in read file", err.Error())
 		return
 	}
-
 
 	input := make([]interface{}, 3)
 	input[0] = "sum"
@@ -618,29 +551,27 @@ func TestFloatSum(t *testing.T) {
 
 	fmt.Printf("input is %v\n", input)
 
-
-	res, err := engine.CallInf(common.Address{}, code, input,nil)
+	res, err := engine.CallInf(nil, code, input, nil)
 	if err != nil {
 		fmt.Println("call error!", err.Error())
 	}
 	fmt.Printf("res:%v\n", res)
 	fmt.Println(util.ByteToFloat32(res))
 	fmt.Println(math.Float32frombits(binary.LittleEndian.Uint32(res)))
-	if math.Float32frombits(binary.LittleEndian.Uint32(res))  != 1.6 {
+	if math.Float32frombits(binary.LittleEndian.Uint32(res)) != 1.6 {
 		t.Fatal("the res should be  1.6 ")
 	}
 	//fmt.Println(engine.memory)
 
 }
 func TestDoubleSum(t *testing.T) {
-	engine := NewExecutionEngine(nil,nil,nil,nil,"test")
+	engine := NewExecutionEngine(nil, "test")
 	//test
 	code, err := ioutil.ReadFile("./testdata2/float.wasm")
 	if err != nil {
 		fmt.Println("error in read file", err.Error())
 		return
 	}
-
 
 	input := make([]interface{}, 3)
 	input[0] = "sumDouble"
@@ -649,22 +580,20 @@ func TestDoubleSum(t *testing.T) {
 
 	fmt.Printf("input is %v\n", input)
 
-
-	res, err := engine.CallInf(common.Address{}, code, input,nil)
+	res, err := engine.CallInf(nil, code, input, nil)
 	if err != nil {
 		fmt.Println("call error!", err.Error())
 	}
 	fmt.Printf("res:%v\n", res)
 	fmt.Println(util.ByteToFloat64(res))
 	fmt.Println(math.Float64frombits(binary.LittleEndian.Uint64(res)))
-	if math.Float64frombits(binary.LittleEndian.Uint64(res))  != 1.6 {
+	if math.Float64frombits(binary.LittleEndian.Uint64(res)) != 1.6 {
 		t.Fatal("the res should be  1.6 ")
 	}
 }
 
-
 func TestCalloc(t *testing.T) {
-	engine := NewExecutionEngine(nil,nil,nil,nil,"test")
+	engine := NewExecutionEngine(nil, "test")
 	//test
 	code, err := ioutil.ReadFile("./testdata2/calloc.wasm")
 	if err != nil {
@@ -672,15 +601,12 @@ func TestCalloc(t *testing.T) {
 		return
 	}
 
-
 	input := make([]interface{}, 1)
 	input[0] = "retArray"
 
-
 	fmt.Printf("input is %v\n", input)
 
-
-	res, err := engine.CallInf(common.Address{}, code, input,nil)
+	res, err := engine.CallInf(nil, code, input, nil)
 	if err != nil {
 		fmt.Println("call error!", err.Error())
 	}
@@ -688,13 +614,13 @@ func TestCalloc(t *testing.T) {
 
 	fmt.Println(engine.vm.memory.MemPoints)
 	offset := binary.LittleEndian.Uint32(res)
-	bytes,_ := engine.vm.memory.GetPointerMemory(uint64(offset))
+	bytes, _ := engine.vm.memory.GetPointerMemory(uint64(offset))
 	fmt.Println(bytes)
 
 }
 
 func TestMalloc(t *testing.T) {
-	engine := NewExecutionEngine(nil,nil,nil,nil,"test")
+	engine := NewExecutionEngine(nil, "test")
 	//test
 	code, err := ioutil.ReadFile("./testdata2/malloc.wasm")
 	if err != nil {
@@ -702,18 +628,15 @@ func TestMalloc(t *testing.T) {
 		return
 	}
 
-
 	input := make([]interface{}, 4)
 	input[0] = "initStu"
 	input[1] = 100
 	input[2] = 90
 	input[3] = 85
 
-
 	fmt.Printf("input is %v\n", input)
 
-
-	res, err := engine.CallInf(common.Address{}, code, input,nil)
+	res, err := engine.CallInf(nil, code, input, nil)
 	if err != nil {
 		fmt.Println("call error!", err.Error())
 	}
@@ -721,14 +644,14 @@ func TestMalloc(t *testing.T) {
 
 	fmt.Println(engine.vm.memory.MemPoints)
 	offset := binary.LittleEndian.Uint32(res)
-	bytes,_ := engine.vm.memory.GetPointerMemory(uint64(offset))
+	bytes, _ := engine.vm.memory.GetPointerMemory(uint64(offset))
 	fmt.Println(bytes)
 
 }
 
 //use 'arrayLen' instead of  'sizeof'
 func TestArraylen(t *testing.T) {
-	engine := NewExecutionEngine(nil,nil,nil,nil,"test")
+	engine := NewExecutionEngine(nil, "test")
 	//test
 	code, err := ioutil.ReadFile("./testdata2/arraylen.wasm")
 	if err != nil {
@@ -736,18 +659,14 @@ func TestArraylen(t *testing.T) {
 		return
 	}
 
-
 	input := make([]interface{}, 3)
 	input[0] = "combine"
-	input[1] = []int{1,2,3,4,5}
-	input[2] = []int{6,7,8,9,10,11}
-
-
+	input[1] = []int{1, 2, 3, 4, 5}
+	input[2] = []int{6, 7, 8, 9, 10, 11}
 
 	fmt.Printf("input is %v\n", input)
 
-
-	res, err := engine.CallInf(common.Address{}, code, input,nil)
+	res, err := engine.CallInf(nil, code, input, nil)
 	if err != nil {
 		fmt.Println("call error!", err.Error())
 	}
@@ -755,21 +674,19 @@ func TestArraylen(t *testing.T) {
 
 	fmt.Println(engine.vm.memory.MemPoints)
 	offset := binary.LittleEndian.Uint32(res)
-	bytes,_ := engine.vm.memory.GetPointerMemory(uint64(offset))
+	bytes, _ := engine.vm.memory.GetPointerMemory(uint64(offset))
 	fmt.Println(bytes)
 	cnt := len(bytes) / 4
-	resarray := make([]int,cnt)
-	for i:= 0 ;i < cnt;i++{
-		resarray[i] = int(binary.LittleEndian.Uint32(bytes[i*4:(i+1)*4]))
+	resarray := make([]int, cnt)
+	for i := 0; i < cnt; i++ {
+		resarray[i] = int(binary.LittleEndian.Uint32(bytes[i*4 : (i+1)*4]))
 	}
 	fmt.Println(resarray)
 
-
 }
 
-
 func TestAddress(t *testing.T) {
-	engine := NewExecutionEngine(nil,nil,nil,nil,"test")
+	engine := NewExecutionEngine(nil, "test")
 	//test
 	code, err := ioutil.ReadFile("./testdata2/testGetAddress.wasm")
 	if err != nil {
@@ -782,16 +699,15 @@ func TestAddress(t *testing.T) {
 
 	fmt.Printf("input is %v\n", input)
 
-	res, err := engine.CallInf(common.Address{}, code, input,nil)
+	res, err := engine.CallInf(nil, code, input, nil)
 	if err != nil {
 		fmt.Println("call error!", err.Error())
 	}
 	fmt.Printf("res:%v\n", res)
 }
 
-
 func TestContract(t *testing.T) {
-	engine := NewExecutionEngine(nil,nil,nil,nil,"test")
+	engine := NewExecutionEngine(nil, "test")
 	//test
 	code, err := ioutil.ReadFile("./testdata2/contractTest.wasm")
 	if err != nil {
@@ -800,17 +716,17 @@ func TestContract(t *testing.T) {
 	}
 	input := make([]interface{}, 3)
 	input[0] = "apply"
-	input[1] = 9999        //code ,address
-	input[2] = 0			//action
+	input[1] = 9999 //code ,address
+	input[2] = 0    //action
 
-	msg := make([]interface{},3)
+	msg := make([]interface{}, 3)
 	msg[0] = 9999
 	msg[1] = 1000
 	msg[2] = 50
 
 	fmt.Printf("input is %v\n", input)
 
-	res, err := engine.CallInf(common.Address{}, code, input,msg)
+	res, err := engine.CallInf(nil, code, input, msg)
 	if err != nil {
 		fmt.Println("call error!", err.Error())
 	}
@@ -821,9 +737,8 @@ func TestContract(t *testing.T) {
 
 }
 
-
 func TestString(t *testing.T) {
-	engine := NewExecutionEngine(nil,nil,nil,nil,"test")
+	engine := NewExecutionEngine(nil, "test")
 	//test
 	code, err := ioutil.ReadFile("./testdata2/stringtest.wasm")
 	if err != nil {
@@ -833,88 +748,23 @@ func TestString(t *testing.T) {
 
 	input := make([]interface{}, 2)
 	input[0] = "greeting"
-	input[1] = "may the force be with you"        //code ,address
+	input[1] = "may the force be with you" //code ,address
 
 	fmt.Printf("input is %v\n", input)
 
-
-	res, err := engine.CallInf(common.Address{}, code, input,nil)
+	res, err := engine.CallInf(nil, code, input, nil)
 	if err != nil {
 		fmt.Println("call error!", err.Error())
 	}
 	fmt.Printf("res:%v\n", res)
-
 
 	fmt.Println(engine.vm.memory.MemPoints)
 	offset := uint64(binary.LittleEndian.Uint32(res))
 	length := engine.vm.memory.MemPoints[offset].Length
-	fmt.Println(engine.vm.memory.Memory[offset:int(offset)+int(length)])
-	fmt.Println(string(engine.vm.memory.Memory[offset:int(offset)+int(length)]))
-	if input[1] != string(engine.vm.memory.Memory[offset:int(offset)+int(length)]){
-		t.Fatal("the return should be :"+input[1].(string))
+	fmt.Println(engine.vm.memory.Memory[offset : int(offset)+int(length)])
+	fmt.Println(string(engine.vm.memory.Memory[offset : int(offset)+int(length)]))
+	if input[1] != string(engine.vm.memory.Memory[offset:int(offset)+int(length)]) {
+		t.Fatal("the return should be :" + input[1].(string))
 	}
 
 }
-
-/*func TestContractCall(t *testing.T){
-	engine := NewExecutionEngine(nil,nil,nil,nil,"test")
-	//test
-	code, err := ioutil.ReadFile("./testdata2/callContract.wasm")
-	if err != nil {
-		fmt.Println("error in read file", err.Error())
-		return
-	}
-
-	input := make([]interface{}, 3)
-	input[0] = "testCall"
-	input[1] = 10
-	input[2] = 29
-
-	fmt.Printf("input is %v\n", input)
-
-	res, err := engine.CallInf(common.Address{}, code, input,nil)
-	if err != nil {
-		fmt.Println("call error!", err.Error())
-	}
-	fmt.Printf("res:%v\n", res)
-
-	if binary.LittleEndian.Uint32(res) != uint32(39){
-		t.Fatal("the result should be 39!")
-	}
-
-
-}*/
-
-
-/*
-func TestConststr(t *testing.T){
-	engine := NewExecutionEngine(nil,nil,nil,nil,"test")
-	//test
-	code, err := ioutil.ReadFile("./testdata2/conststr.wasm")
-	if err != nil {
-		fmt.Println("error in read file", err.Error())
-		return
-	}
-
-*/
-/*	input := make([]interface{}, 2)
-	input[0] = "contactHello"
-	input[1] = "world! "*//*
-
-
-	input := make([]interface{}, 1)
-	input[0] = "test"
-
-	fmt.Printf("input is %v\n", input)
-
-	res, err := engine.CallInf(common.Address{}, code, input,nil)
-	if err != nil {
-		fmt.Println("call error!", err.Error())
-	}
-	fmt.Printf("res:%v\n", res)
-	fmt.Println(engine.vm.memory.Memory[int(binary.LittleEndian.Uint32(res)):])
-
-	sss,_ :=engine.vm.memory.GetPointerMemory(uint64(binary.LittleEndian.Uint32(res)))
-	fmt.Println(string(sss))
-
-}*/

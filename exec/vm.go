@@ -12,13 +12,11 @@ import (
 
 	"bytes"
 	"fmt"
-	"github.com/ONTIO/Ontology-wasm/disasm"
-	"github.com/ONTIO/Ontology-wasm/exec/internal/compile"
-	"github.com/ONTIO/Ontology-wasm/memory"
-	"github.com/ONTIO/Ontology-wasm/wasm"
-	ops "github.com/ONTIO/Ontology-wasm/wasm/operators"
-
-	"github.com/Ontology/common"
+	"github.com/ontio/ontology-wasm/disasm"
+	"github.com/ontio/ontology-wasm/exec/internal/compile"
+	"github.com/ontio/ontology-wasm/memory"
+	"github.com/ontio/ontology-wasm/wasm"
+	ops "github.com/ontio/ontology-wasm/wasm/operators"
 )
 
 var (
@@ -83,8 +81,8 @@ type VM struct {
 	//store the env call parameters
 	envCall *EnvCall
 	//store a engine pointer
-	CodeHash common.Address
-	Caller   common.Address
+	CodeHash []byte
+	Caller   []byte
 	Engine   *ExecutionEngine
 }
 
@@ -189,7 +187,7 @@ func (vm *VM) GetMessageBytes() ([]byte, error) {
 
 		default:
 			//todo need support array types???
-			return nil,errors.New("[GetMessageBytes] unsupported type")
+			return nil, errors.New("[GetMessageBytes] unsupported type")
 
 		}
 	}
@@ -448,7 +446,7 @@ outer:
 //start a new vm
 func (vm *VM) CallProductContract(module *wasm.Module, actionName []byte, arg []byte) (uint64, error) {
 
-	methodName:= CONTRACT_METHOD_NAME
+	methodName := CONTRACT_METHOD_NAME
 
 	//1. exec the method code
 	entry, ok := module.Export.Entries[methodName]
@@ -475,33 +473,32 @@ func (vm *VM) CallProductContract(module *wasm.Module, actionName []byte, arg []
 
 	engine.SetNewVM(newvm)
 
-	actionIdx,err:=newvm.SetPointerMemory(actionName)
-	if err != nil{
-		return uint64(0),err
+	actionIdx, err := newvm.SetPointerMemory(actionName)
+	if err != nil {
+		return uint64(0), err
 	}
-	argIdx,err := newvm.SetPointerMemory(arg)
-	if err != nil{
-		return uint64(0),err
+	argIdx, err := newvm.SetPointerMemory(arg)
+	if err != nil {
+		return uint64(0), err
 	}
 
-	res, err := newvm.ExecCode(true, int64(index), uint64(actionIdx),uint64(argIdx))
-	if err != nil{
-		return uint64(0),err
+	res, err := newvm.ExecCode(true, int64(index), uint64(actionIdx), uint64(argIdx))
+	if err != nil {
+		return uint64(0), err
 	}
-	resBytes ,err := newvm.GetPointerMemory(res.(uint64))
-	if err != nil{
-		return uint64(0),err
+	resBytes, err := newvm.GetPointerMemory(res.(uint64))
+	if err != nil {
+		return uint64(0), err
 	}
 	//copy memory if need!!!
 	engine.RestoreVM()
-	idx,err := vm.SetPointerMemory(resBytes)
-	if err != nil{
-		return uint64(0),err
+	idx, err := vm.SetPointerMemory(resBytes)
+	if err != nil {
+		return uint64(0), err
 	}
 
 	return uint64(idx), nil
 }
-
 
 //todo implement the "call other contract function"
 //this is for the "test" version call

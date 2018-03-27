@@ -42,8 +42,8 @@ import (
 	"bytes"
 	"encoding/binary"
 
-	"github.com/ONTIO/Ontology-wasm/disasm"
-	ops "github.com/ONTIO/Ontology-wasm/wasm/operators"
+	"github.com/ontio/ontology-wasm/disasm"
+	ops "github.com/ontio/ontology-wasm/wasm/operators"
 )
 
 // A small note on the usage of discard instructions:

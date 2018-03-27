@@ -8,8 +8,8 @@ import (
 	"math"
 	"reflect"
 
-	"github.com/ONTIO/Ontology-wasm/exec/internal/compile"
 	"fmt"
+	"github.com/ontio/ontology-wasm/exec/internal/compile"
 )
 
 type function interface {
@@ -19,11 +19,11 @@ type function interface {
 type compiledFunction struct {
 	code           []byte
 	branchTables   []*compile.BranchTable
-	maxDepth       int  // maximum stack depth reached while executing the function body
-	totalLocalVars int  // number of local variables used by the function
-	args           int  // number of arguments the function accepts
-	returns        bool // whether the function returns a value
-	isEnv		   bool //add for envfunc
+	maxDepth       int    // maximum stack depth reached while executing the function body
+	totalLocalVars int    // number of local variables used by the function
+	args           int    // number of arguments the function accepts
+	returns        bool   // whether the function returns a value
+	isEnv          bool   //add for envfunc
 	name           string //method name to call
 }
 
@@ -92,7 +92,7 @@ func (compiled compiledFunction) call(vm *VM, index int64) {
 		curFunc: index,
 	}
 
-	rtrn := vm.execCode(false,compiled)
+	rtrn := vm.execCode(false, compiled)
 
 	//restore execution context
 	vm.ctx = prevCtxt

@@ -113,9 +113,9 @@ func (module *Module) resolveImports(resolve ResolveFunc) error {
 				//todo complete the function sig and body
 				//todo verify the env function sig????
 				/*
-				if !services.Exists(importEntry.FieldName) {
-					return errors.New("function " + importEntry.FieldName + " is not supported! ")
-				}
+					if !services.Exists(importEntry.FieldName) {
+						return errors.New("function " + importEntry.FieldName + " is not supported! ")
+					}
 				*/
 
 				fn := &Function{IsEnvFunc: true, Name: importEntry.FieldName, Sig: &FunctionSig{ParamTypes: funcType.ParamTypes, ReturnTypes: funcType.ReturnTypes}, Body: &FunctionBody{}}
@@ -125,11 +125,11 @@ func (module *Module) resolveImports(resolve ResolveFunc) error {
 				funcs++
 			case ExternalGlobal:
 				//todo to support the memorybase global
-				if importEntry.FieldName == "memoryBase" ||importEntry.FieldName == "tableBase" {
-					glb := &GlobalEntry{Type:&GlobalVar{Type:ValueTypeI32,Mutable:false},
-														Init:[]byte{getGlobal,byte(0),end}, //global 0 end
-														InitVal:uint64(65536 / 4),  // pagesize/4
-														IsEnv:true}
+				if importEntry.FieldName == "memoryBase" || importEntry.FieldName == "tableBase" {
+					glb := &GlobalEntry{Type: &GlobalVar{Type: ValueTypeI32, Mutable: false},
+						Init:    []byte{getGlobal, byte(0), end}, //global 0 end
+						InitVal: uint64(65536 / 4),               // pagesize/4
+						IsEnv:   true}
 					module.GlobalIndexSpace = append(module.GlobalIndexSpace, *glb)
 					module.imports.Globals++
 				}
@@ -141,7 +141,7 @@ func (module *Module) resolveImports(resolve ResolveFunc) error {
 			case ExternalMemory:
 				initMemSize := importEntry.Type.(MemoryImport).Type.Limits.Initial
 				//todo decide how to lazy alloc the memory???
-				memory := make([]byte,65536 *initMemSize)
+				memory := make([]byte, 65536*initMemSize)
 				module.LinearMemoryIndexSpace[0] = memory
 				module.imports.Memories++
 

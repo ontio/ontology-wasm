@@ -23,13 +23,9 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"errors"
-	"github.com/ONTIO/Ontology-wasm/memory"
-	"github.com/ONTIO/Ontology-wasm/wasm"
+	"github.com/ontio/ontology-wasm/memory"
 	"strconv"
 	"strings"
-	"github.com/Ontology/core/ledger"
-	"github.com/Ontology/common"
-	"github.com/Ontology/vm/types"
 )
 
 type Args struct {
@@ -65,15 +61,12 @@ func NewInteropService() *InteropService {
 	service.Register("arrayLen", arrayLen)
 	service.Register("memcpy", memcpy)
 	service.Register("read_message", readMessage)
-	service.Register("callContract", callContract)
 	service.Register("ReadInt32Param", readInt32Param)
 	service.Register("ReadInt64Param", readInt64Param)
 	service.Register("ReadStringParam", readStringParam)
 	service.Register("RawUnmashal", rawUnmashal)
 	service.Register("JsonUnmashal", jsonUnmashal)
 	service.Register("JsonMashal", jsonMashal)
-	service.Register("GetCaller", GetCaller)
-	service.Register("GetSelfAddress", GetCodeHash)
 
 	//===================add block apis below==================
 	return &service
@@ -260,64 +253,6 @@ func readMessage(engine *ExecutionEngine) (bool, error) {
 	if envCall.envReturns {
 		engine.vm.pushUint64(uint64(length))
 	}
-
-	return true, nil
-}
-
-//call other contract
-//todo rewrite logic
-func callContract(engine *ExecutionEngine) (bool, error) {
-	envCall := engine.vm.envCall
-	params := envCall.envParams
-	if len(params) != 3 {
-		return false, errors.New("parameter count error while call readMessage")
-	}
-	contractAddressIdx := params[0]
-	addr, err := engine.vm.GetPointerMemory(contractAddressIdx)
-	if err != nil {
-		return false, errors.New("get Contract address failed")
-	}
-	//the contract codes
-	contractBytes, err := getContractFromAddr(addr)
-	if err != nil {
-		return false, err
-	}
-	bf := bytes.NewBuffer(contractBytes)
-	module, err := wasm.ReadModule(bf, emptyImporter)
-	if err != nil {
-		return false, errors.New("load Module failed")
-	}
-
-	methodName, err := engine.vm.GetPointerMemory(params[1])
-	if err != nil {
-		return false, errors.New("[callContract]get Contract methodName failed")
-	}
-
-	arg ,err := engine.vm.GetPointerMemory(params[2])
-	if err != nil {
-		return false, errors.New("[callContract]get Contract arg failed")
-	}
-
-	res, err := engine.vm.CallProductContract(module,methodName,arg)
-
-	engine.vm.ctx = envCall.envPreCtx
-	if envCall.envReturns {
-		engine.vm.pushUint64(res)
-	}
-	//if has args
-/*	var args []uint64
-	if len(params) > 2 { // must be 3
-		args = params[2:]
-	}
-
-	res, err := engine.vm.CallContract(module, trimBuffToString(methodName), args...)
-	if err != nil {
-		return false, errors.New("call contract " + trimBuffToString(methodName) + " failed")
-	}
-	//engine.vm.RestoreStat()
-	if envCall.envReturns {
-		engine.vm.pushUint64(res)
-	}*/
 
 	return true, nil
 }
@@ -692,70 +627,6 @@ func stringcmp(engine *ExecutionEngine) (bool, error) {
 		engine.vm.pushUint64(uint64(ret))
 	}
 	return true, nil
-}
-
-func GetCaller(engine *ExecutionEngine) (bool, error) {
-	envCall := engine.vm.envCall
-
-	caller := engine.vm.Caller
-	idx, err := engine.vm.SetPointerMemory(caller.ToArray())
-	if err != nil {
-		return false, err
-	}
-	engine.vm.ctx = envCall.envPreCtx
-	if envCall.envReturns {
-		engine.vm.pushUint64(uint64(idx))
-	}
-	return true, nil
-}
-
-func GetCodeHash(engine *ExecutionEngine) (bool, error) {
-	envCall := engine.vm.envCall
-
-	codeHash := engine.vm.CodeHash
-	idx, err := engine.vm.SetPointerMemory(codeHash.ToArray())
-	if err != nil {
-		return false, err
-	}
-	engine.vm.ctx = envCall.envPreCtx
-	if envCall.envReturns {
-		engine.vm.pushUint64(uint64(idx))
-	}
-	return true, nil
-}
-
-func emptyImporter(name string) (*wasm.Module, error) {
-	return nil, nil
-}
-
-func getContractFromAddr(addr []byte) ([]byte, error) {
-
-	//todo get the contract code from ledger
-	//just for test
-/*			contract := trimBuffToString(addr)
-			code, err := ioutil.ReadFile(fmt.Sprintf("./testdata2/%s.wasm",contract))
-			if err != nil {
-				fmt.Printf("./testdata2/%s.wasm is not exist",contract)
-				return nil,err
-			}
-
-			return code,nil*/
-	codeHash, err := common.Uint160ParseFromBytes(addr)
-	if err != nil {
-		return nil, errors.New("get address Code hash failed")
-	}
-
-	contract, err := ledger.DefLedger.GetContractState(codeHash)
-	if err != nil {
-		return nil, errors.New("get contract state failed")
-	}
-
-	if contract.VmType != types.WASMVM {
-		return nil, errors.New(" contract is not a wasm contract")
-	}
-
-	return contract.Code, nil
-
 }
 
 //trim the '\00' byte

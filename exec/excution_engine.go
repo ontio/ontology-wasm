@@ -22,61 +22,57 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
-	"github.com/Ontology/common"
-	"github.com/Ontology/vm/neovm/interfaces"
-	"github.com/ONTIO/Ontology-wasm/memory"
-	"github.com/ONTIO/Ontology-wasm/validate"
-	"github.com/ONTIO/Ontology-wasm/wasm"
+	"fmt"
+	"github.com/ontio/ontology-wasm/memory"
+	"github.com/ontio/ontology-wasm/util"
+	"github.com/ontio/ontology-wasm/validate"
+	"github.com/ontio/ontology-wasm/wasm"
 	"math"
 	"os"
 	"reflect"
-	"fmt"
-	"github.com/ONTIO/Ontology-wasm/util"
 )
 
 const (
 	CONTRACT_METHOD_NAME = "invoke"
 	PARAM_SPLITER        = "|"
-	VM_STACK_DEPTH		 = 10
+	VM_STACK_DEPTH       = 10
 )
 
 // backup vm while call other contracts
-type vmstack struct{
+type vmstack struct {
 	top   int
 	stack []*VM
 }
 
-func(s *vmstack)push(vm *VM) error{
-	if s.top == len(s.stack){
-		return errors.New(fmt.Sprintf("[vm stack push] stack is full, only support %d contracts calls",VM_STACK_DEPTH))
+func (s *vmstack) push(vm *VM) error {
+	if s.top == len(s.stack) {
+		return errors.New(fmt.Sprintf("[vm stack push] stack is full, only support %d contracts calls", VM_STACK_DEPTH))
 	}
-	s.stack[s.top + 1] = vm
+	s.stack[s.top+1] = vm
 	s.top += 1
 	return nil
 }
 
-func (s *vmstack)pop() (*VM,error){
-	if s.top == 0{
-		return nil,errors.New("[vm stack pop] stack is empty")
+func (s *vmstack) pop() (*VM, error) {
+	if s.top == 0 {
+		return nil, errors.New("[vm stack pop] stack is empty")
 	}
 
 	retvm := s.stack[s.top]
 	s.top -= 1
-	return retvm,nil
+	return retvm, nil
 }
 
-func newStack(depth int) *vmstack{
-	return &vmstack{top:0,stack:make([]*VM,depth)}
+func newStack(depth int) *vmstack {
+	return &vmstack{top: 0, stack: make([]*VM, depth)}
 }
 
 //todo add parameters
-func NewExecutionEngine(icontainer interfaces.ICodeContainer, icrypto interfaces.ICrypto, itable interfaces.ICodeTable, iservice IInteropService, ver string) *ExecutionEngine {
+func NewExecutionEngine(iservice IInteropService, ver string) *ExecutionEngine {
 
 	engine := &ExecutionEngine{
-		crypto: icrypto, table: itable,
-		codeContainer: icontainer,
-		service:       NewInteropService(),
-		version:       ver,
+		service: NewInteropService(),
+		version: ver,
 	}
 	if iservice != nil {
 		engine.service.MergeMap(iservice.GetServiceMap())
@@ -87,14 +83,11 @@ func NewExecutionEngine(icontainer interfaces.ICodeContainer, icrypto interfaces
 }
 
 type ExecutionEngine struct {
-	crypto        	interfaces.ICrypto
-	table         	interfaces.ICodeTable
-	service       	*InteropService
-	codeContainer 	interfaces.ICodeContainer
-	vm      		*VM
+	service *InteropService
+	vm      *VM
 	//todo ,move to contract info later
-	version 		string //for test different contracts
-	backupVM     	*vmstack
+	version  string //for test different contracts
+	backupVM *vmstack
 }
 
 func (e *ExecutionEngine) GetVM() *VM {
@@ -104,10 +97,10 @@ func (e *ExecutionEngine) GetVM() *VM {
 //for call other contract,
 // 1.store current vm
 // 2.load new vm
-func (e *ExecutionEngine)SetNewVM(vm *VM) error{
+func (e *ExecutionEngine) SetNewVM(vm *VM) error {
 
 	err := e.backupVM.push(e.vm)
-	if err != nil{
+	if err != nil {
 		return err
 	}
 	e.vm = vm
@@ -117,9 +110,9 @@ func (e *ExecutionEngine)SetNewVM(vm *VM) error{
 //for call other contract,
 // 1.pop stored vm
 // 2.reset vm
-func (e *ExecutionEngine)RestoreVM() error{
-	backupVM,err := e.backupVM.pop()
-	if err != nil{
+func (e *ExecutionEngine) RestoreVM() error {
+	backupVM, err := e.backupVM.pop()
+	if err != nil {
 		return err
 	}
 	e.vm = backupVM
@@ -127,7 +120,7 @@ func (e *ExecutionEngine)RestoreVM() error{
 }
 
 //use this method just for test
-func (e *ExecutionEngine) CallInf(caller common.Address, code []byte, input []interface{}, message []interface{}) ([]byte, error) {
+func (e *ExecutionEngine) CallInf(caller []byte, code []byte, input []interface{}, message []interface{}) ([]byte, error) {
 	methodName := input[0].(string)
 
 	//1. read code
@@ -162,7 +155,8 @@ func (e *ExecutionEngine) CallInf(caller common.Address, code []byte, input []in
 	vm.SetMessage(message)
 
 	vm.Caller = caller
-	vm.CodeHash = common.ToCodeHash(code)
+	//todo hash code
+	vm.CodeHash = code
 
 	entry, ok := m.Export.Entries[methodName]
 	if ok == false {
@@ -308,12 +302,12 @@ func (e *ExecutionEngine) GetMemory() *memory.VMmemory {
 //	return e.memory
 //}
 
-func (e *ExecutionEngine) Create(caller common.Address, code []byte) ([]byte, error) {
+func (e *ExecutionEngine) Create(caller []byte, code []byte) ([]byte, error) {
 	return code, nil
 }
 
 //the input format should be "methodname | args"
-func (e *ExecutionEngine) Call(caller common.Address, code, input []byte) (returnbytes []byte, er error) {
+func (e *ExecutionEngine) Call(caller []byte, code, input []byte) (returnbytes []byte, er error) {
 
 	//catch the panic to avoid crash the whole node
 	defer func() {
@@ -363,7 +357,8 @@ func (e *ExecutionEngine) Call(caller common.Address, code, input []byte) (retur
 		// vm.SetMessage(message)
 
 		vm.Caller = caller
-		vm.CodeHash = common.ToCodeHash(code)
+		//todo hashcode
+		vm.CodeHash = code
 
 		entry, ok := m.Export.Entries[methodName]
 		if ok == false {

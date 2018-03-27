@@ -8,7 +8,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/ONTIO/Ontology-wasm/wasm"
+	"github.com/ontio/ontology-wasm/wasm"
 )
 
 func TestNewConversionOp(t *testing.T) {

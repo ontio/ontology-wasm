@@ -11,8 +11,8 @@ import (
 	"io"
 	"io/ioutil"
 
-	"github.com/ONTIO/Ontology-wasm/wasm/internal/readpos"
-	"github.com/ONTIO/Ontology-wasm/wasm/leb128"
+	"github.com/ontio/ontology-wasm/wasm/internal/readpos"
+	"github.com/ontio/ontology-wasm/wasm/leb128"
 )
 
 // SectionID is a 1-byte code that encodes the section code of both known and custom sections.
@@ -452,10 +452,10 @@ func (m *Module) readSectionGlobals(r io.Reader) error {
 
 // GlobalEntry declares a global variable.
 type GlobalEntry struct {
-	Type *GlobalVar // Type holds information about the value type and mutability of the variable
-	Init []byte     // Init is an initializer expression that computes the initial value of the variable
-	IsEnv bool		// true if the Global is env import
-	InitVal uint64  // todo init value from env outside
+	Type    *GlobalVar // Type holds information about the value type and mutability of the variable
+	Init    []byte     // Init is an initializer expression that computes the initial value of the variable
+	IsEnv   bool       // true if the Global is env import
+	InitVal uint64     // todo init value from env outside
 }
 
 func readGlobalEntry(r io.Reader) (e GlobalEntry, err error) {

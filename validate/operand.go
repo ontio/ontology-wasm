@@ -5,7 +5,7 @@
 package validate
 
 import (
-	"github.com/ONTIO/Ontology-wasm/wasm"
+	"github.com/ontio/ontology-wasm/wasm"
 )
 
 type operand struct {

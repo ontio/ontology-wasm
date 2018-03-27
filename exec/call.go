@@ -30,26 +30,26 @@ func (vm *VM) doCall(compiled compiledFunction, index int64) {
 
 	if compiled.isEnv {
 		//set the parameters and return in vm ,these will be used by inter service
-		if vm.envCall == nil{
+		if vm.envCall == nil {
 			vm.envCall = &EnvCall{}
 		}
 
 		vm.envCall.envParams = locals
 		if compiled.returns {
 			vm.envCall.envReturns = true
-		}else{
+		} else {
 			vm.envCall.envReturns = false
 		}
 		vm.envCall.envPreCtx = prevCtxt
 
-		v,ok := vm.Services[compiled.name]
-		if ok{
-			rtn,err := v(vm.Engine)
-			if err != nil || !rtn{
+		v, ok := vm.Services[compiled.name]
+		if ok {
+			rtn, err := v(vm.Engine)
+			if err != nil || !rtn {
 				fmt.Println("call method failed!" + compiled.name)
 				//panic("call method failed!" + compiled.name)
 			}
-		}else{
+		} else {
 			fmt.Println("can't find method " + compiled.name)
 			vm.ctx = prevCtxt
 			if compiled.returns {
@@ -71,7 +71,7 @@ func (vm *VM) doCall(compiled compiledFunction, index int64) {
 		//}
 
 	} else {
-		rtrn := vm.execCode(false,compiled)
+		rtrn := vm.execCode(false, compiled)
 
 		// restore execution context
 		vm.ctx = prevCtxt

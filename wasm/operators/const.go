@@ -5,7 +5,7 @@
 package operators
 
 import (
-	"github.com/ONTIO/Ontology-wasm/wasm"
+	"github.com/ontio/ontology-wasm/wasm"
 )
 
 var (

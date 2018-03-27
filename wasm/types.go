@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/ONTIO/Ontology-wasm/wasm/leb128"
+	"github.com/ontio/ontology-wasm/wasm/leb128"
 )
 
 // ValueType represents the type of a valid value in Wasm
