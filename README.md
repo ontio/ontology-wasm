@@ -1,33 +1,21 @@
 Ontology wasm
 =====
-Ontology wasm is a VM for ontology block chain, this project is based on `go-interpreter` `wagon`
+## Introduction
+Ontology wasm is a VM for ontology block chain, it can also be used for other stand-alone environment not only for block chains.
+
+WebAssembly (abbreviated *Wasm*) is a binary instruction format for a stack-based virtual machine. Wasm is designed as a portable target for compilation of high-level languages like C/C++/Rust.
 
 
 
-wagon
-=====
+## Structure
 
-[![Build Status](https://travis-ci.org/go-interpreter/wagon.svg?branch=master)](https://travis-ci.org/go-interpreter/wagon)
-[![GoDoc](https://godoc.org/github.com/go-interpreter/wagon?status.svg)](https://godoc.org/github.com/go-interpreter/wagon)
+Ontology-wasm disassemble wasm binary codes based on [Wagon](https://github.com/go-interpreter/wagon) project with extra memory management. 
 
-`wagon` is a [WebAssembly](http://webassembly.org)-based interpreter in [Go](https://golang.org), for [Go](https://golang.org).
+Currently, we support int, int64 float, double, string(byte array), int array and int64 array data types,
 
-**NOTE:** `wagon` requires `Go >= 1.9.x`.
+since wasm only has 4 types (i32,i64,f32 and f64), that means only the 4 types data could be pushed into the stack,any other complex data type must be stored in memory.
 
-## Purpose
+In  MVP version,every module can has only one linear memory
 
-`wagon` aims to provide tools (executables+libraries) to:
+![memory](./doc/images/memory.png)
 
-- decode `wasm` binary files
-- load and execute `wasm` modules' bytecode.
-
-`wagon` doesn't concern itself with the production of the `wasm` binary files;
-these files should be produced with another tool (such as [wabt](https://github.com/WebAssembly/wabt) or [binaryen](https://github.com/WebAssembly/binaryen).)
-`wagon` *may* provide a utility to produce `wasm` files from `wast` or `wat` files (and vice versa.)
-
-The primary goal of `wagon` is to provide the building blocks to be able to build an interpreter for Go code, that could be embedded in Jupyter or any Go program.
-
-
-## Contributing
-
-See the [CONTRIBUTING](https://github.com/go-interpreter/license/blob/master/CONTRIBUTE.md) guide for pointers on how to contribute to `go-interpreter` and `wagon`.
