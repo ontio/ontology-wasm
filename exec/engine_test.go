@@ -323,15 +323,6 @@ func TestWhileLoop(t *testing.T) {
 
 func TestIfII(t *testing.T) {
 
-	s := "b456c4862902525e17ace6a2607f0806f51df0a98c3629c27f00efcf87ee8784"
-	fmt.Println([]byte(s))
-	u := binary.LittleEndian.Uint64([]byte(s))
-
-	b := make([]byte, 64)
-	binary.LittleEndian.PutUint64(b, u)
-	fmt.Println(b)
-
-	fmt.Println(u)
 	engine := NewExecutionEngine(nil, "test")
 	//test
 	code, err := ioutil.ReadFile("./test_data2/ifTest.wasm")
@@ -383,11 +374,9 @@ func TestStrings(t *testing.T) {
 		fmt.Println("call error!", err.Error())
 	}
 	fmt.Printf("res:%v\n", res)
-	fmt.Println(string(res))
 	if binary.LittleEndian.Uint32(res) != 26 {
 		t.Fatal("the res should be 26")
 	}
-	//fmt.Println(engine.memory)
 
 }
 
@@ -497,42 +486,6 @@ func TestSimplestruct2(t *testing.T) {
 		t.Fatal("the res should be 185")
 	}*/
 
-}
-
-func TestComplexstruct(t *testing.T) {
-	engine := NewExecutionEngine(nil, "test")
-	//test
-	code, err := ioutil.ReadFile("./test_data2/complexStruct.wasm")
-	if err != nil {
-		fmt.Println("error in read file", err.Error())
-		return
-	}
-
-	type acct struct {
-		Acct1 []int
-		Acct2 []int
-	}
-
-	s := acct{Acct1: []int{10, 20, 30, 40}}
-
-	input := make([]interface{}, 3)
-	input[0] = "sumAcct1"
-	input[1] = s
-	input[2] = 4
-
-	fmt.Printf("input is %v\n", input)
-
-	res, err := engine.CallInf(nil, code, input, nil)
-	if err != nil {
-		fmt.Println("call error!", err.Error())
-	}
-	fmt.Printf("res:%v\n", res)
-	fmt.Println(engine.vm.memory.Memory[:20])
-	tmp := binary.LittleEndian.Uint32(engine.vm.memory.Memory[0:4])
-	fmt.Println(engine.vm.memory.Memory[tmp : tmp+20])
-	if binary.LittleEndian.Uint32(res) != 100 {
-		t.Fatal("the res should be 100")
-	}
 }
 
 func TestFloatSum(t *testing.T) {
