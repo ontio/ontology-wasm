@@ -386,7 +386,6 @@ func rawUnmashal(engine *ExecutionEngine) (bool, error) {
 	}
 
 	addr := params[0]
-	//size := int(params[1])
 
 	rawAddr := params[2]
 	rawBytes, err := engine.vm.GetPointerMemory(rawAddr)

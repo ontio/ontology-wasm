@@ -73,10 +73,10 @@ func (vm *VMmemory) Malloc(size int) (int, error) {
 
 func (vm *VMmemory) MallocPointer(size int, p_type PType) (int, error) {
 	if vm.Memory == nil || len(vm.Memory) == 0 {
-		return 0, errors.New("memory is not initialized")
+		return 0, errors.New("[MallocPointer]memory is not initialized")
 	}
 	if vm.PointedMemIndex+size > len(vm.Memory) {
-		return 0, errors.New("memory out of bound")
+		return 0, errors.New("[MallocPointer]memory out of bound")
 	}
 
 	offset := vm.PointedMemIndex + 1
@@ -119,7 +119,7 @@ func (vm *VMmemory) GetPointerMemory(addr uint64) ([]byte, error) {
 
 	length := vm.GetPointerMemSize(addr)
 	if int(addr)+length > len(vm.Memory) {
-		return nil, errors.New("memory out of bound")
+		return nil, errors.New("[GetPointerMemory]memory out of bound")
 	} else {
 		return vm.Memory[int(addr) : int(addr)+length], nil
 	}
@@ -179,11 +179,11 @@ func (vm *VMmemory) SetPointerMemory(val interface{}) (int, error) {
 			return vm.copyMemAndGetIdx(floatBytes, PFloat64)
 
 		default:
-			return 0, errors.New("Not supported slice type")
+			return 0, errors.New("[SetPointerMemory]Not supported slice type")
 		}
 
 	default:
-		return 0, errors.New("not supported type")
+		return 0, errors.New("[SetPointerMemory]not supported type")
 	}
 
 }
@@ -191,7 +191,7 @@ func (vm *VMmemory) SetPointerMemory(val interface{}) (int, error) {
 func (vm *VMmemory) SetStructMemory(val interface{}) (int, error) {
 
 	if reflect.TypeOf(val).Kind() != reflect.Struct {
-		return 0, errors.New("SetStructMemory :input is not a struct")
+		return 0, errors.New("[SetStructMemory] :input is not a struct")
 	}
 	valref := reflect.ValueOf(val)
 	//var totalsize = 0
@@ -262,13 +262,6 @@ func (vm *VMmemory) SetMemory(val interface{}) (int, error) {
 	switch val.(type) {
 	case string: //use SetPointerMemory for string
 		return vm.SetPointerMemory(val.(string))
-		/*		b := []byte(val.(string))
-				idx, err := vm.Malloc(len(b))
-				if err != nil {
-					return 0, err
-				}
-				copy(vm.Memory[idx:idx+len(b)], b)
-				return idx, nil*/
 	case int:
 		tmp := make([]byte, 4)
 		binary.LittleEndian.PutUint32(tmp, uint32(val.(int)))
@@ -306,6 +299,6 @@ func (vm *VMmemory) SetMemory(val interface{}) (int, error) {
 		return idx, nil
 
 	default:
-		return 0, errors.New("not supported type")
+		return 0, errors.New("[SetMemory]not supported type")
 	}
 }
