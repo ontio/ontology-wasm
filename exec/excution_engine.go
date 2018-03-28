@@ -68,7 +68,7 @@ func newStack(depth int) *vmstack {
 }
 
 //create new ExecutionEngine
-func NewExecutionEngine(iservice IInteropService, ver string) *ExecutionEngine {
+func NewExecutionEngine(iservice InteropServiceInterface, ver string) *ExecutionEngine {
 
 	engine := &ExecutionEngine{
 		service: NewInteropService(),
