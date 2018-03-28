@@ -105,7 +105,7 @@ func (i *InteropService) GetServiceMap() map[string]func(*ExecutionEngine) (bool
 	return i.serviceMap
 }
 
-//TODO decide to replace the P_UNKNOW type
+//TODO decide to replace the PUnknown type
 
 //for the c language "calloc" function
 func calloc(engine *ExecutionEngine) (bool, error) {
@@ -119,7 +119,7 @@ func calloc(engine *ExecutionEngine) (bool, error) {
 	count := int(params[0])
 	length := int(params[1])
 	//we don't know whats the alloc type here
-	index, err := engine.vm.memory.MallocPointer(count*length, memory.P_UNKNOW)
+	index, err := engine.vm.memory.MallocPointer(count*length, memory.PUnknown)
 	if err != nil {
 		return false, err
 	}
@@ -142,7 +142,7 @@ func malloc(engine *ExecutionEngine) (bool, error) {
 	}
 	size := int(params[0])
 	//we don't know whats the alloc type here
-	index, err := engine.vm.memory.MallocPointer(size, memory.P_UNKNOW)
+	index, err := engine.vm.memory.MallocPointer(size, memory.PUnknown)
 	if err != nil {
 		return false, err
 	}
@@ -171,15 +171,15 @@ func arrayLen(engine *ExecutionEngine) (bool, error) {
 	var result uint64
 	if ok {
 		switch tl.Ptype {
-		case memory.P_INT8, memory.P_STRING:
+		case memory.PInt8, memory.PString:
 			result = uint64(tl.Length / 1)
-		case memory.P_INT16:
+		case memory.PInt16:
 			result = uint64(tl.Length / 2)
-		case memory.P_INT32, memory.P_FLOAT32:
+		case memory.PInt32, memory.PFloat32:
 			result = uint64(tl.Length / 4)
-		case memory.P_INT64, memory.P_FLOAT64:
+		case memory.PInt64, memory.PFloat64:
 			result = uint64(tl.Length / 8)
-		case memory.P_UNKNOW:
+		case memory.PUnknown:
 			//FIXME assume it's byte
 			result = uint64(tl.Length / 1)
 		default:
@@ -243,7 +243,7 @@ func readMessage(engine *ExecutionEngine) (bool, error) {
 		return false, errors.New("readMessage length error")
 	}
 	copy(engine.vm.memory.Memory[addr:addr+length], msgBytes[:length])
-	engine.vm.memory.MemPoints[uint64(addr)] = &memory.TypeLength{Ptype: memory.P_UNKNOW, Length: length}
+	engine.vm.memory.MemPoints[uint64(addr)] = &memory.TypeLength{Ptype: memory.PUnknown, Length: length}
 
 	//1. recover the vm context
 	//2. if the call returns value,push the result to the stack

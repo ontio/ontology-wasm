@@ -126,7 +126,7 @@ func (vm *VM) Malloc(size int) (int, error) {
 }
 
 //alloc memory for pointer and return the first index
-func (vm *VM) MallocPointer(size int, ptype memory.P_Type) (int, error) {
+func (vm *VM) MallocPointer(size int, ptype memory.PType) (int, error) {
 	return vm.memory.MallocPointer(size, ptype)
 }
 
@@ -605,12 +605,12 @@ func (vm *VM) loadModule(module *wasm.Module) error {
 				splited := bytes.Split(entry.Data, []byte{byte(0)})
 				var tmpoffset = int(offset)
 				for _, tmp := range splited {
-					vm.memory.MemPoints[uint64(tmpoffset)] = &memory.TypeLength{Ptype: memory.P_STRING, Length: len(tmp) + 1}
+					vm.memory.MemPoints[uint64(tmpoffset)] = &memory.TypeLength{Ptype: memory.PString, Length: len(tmp) + 1}
 					//vm.memory.AllocedMemIdex = int(tmpoffset)+len(tmp) +1
 					tmpoffset += len(tmp) + 1
 				}
 			} else {
-				vm.memory.MemPoints[uint64(offset)] = &memory.TypeLength{Ptype: memory.P_STRING, Length: len(entry.Data)}
+				vm.memory.MemPoints[uint64(offset)] = &memory.TypeLength{Ptype: memory.PString, Length: len(entry.Data)}
 				//vm.memory.AllocedMemIdex = int(offset)+len(entry.Data)
 			}
 		}

@@ -214,7 +214,7 @@ func (e *ExecutionEngine) CallInf(caller []byte, code []byte, input []interface{
 						idx = offset
 					}
 				}
-				vm.GetMemory().MemPoints[uint64(idx)] = &memory.TypeLength{Ptype: memory.P_INT32, Length: len(param.([]int)) * 4}
+				vm.GetMemory().MemPoints[uint64(idx)] = &memory.TypeLength{Ptype: memory.PInt32, Length: len(param.([]int)) * 4}
 				params[i] = uint64(idx)
 
 			case []int64:
@@ -228,7 +228,7 @@ func (e *ExecutionEngine) CallInf(caller []byte, code []byte, input []interface{
 						idx = offset
 					}
 				}
-				vm.GetMemory().MemPoints[uint64(idx)] = &memory.TypeLength{Ptype: memory.P_INT64, Length: len(param.([]int64)) * 8}
+				vm.GetMemory().MemPoints[uint64(idx)] = &memory.TypeLength{Ptype: memory.PInt64, Length: len(param.([]int64)) * 8}
 				params[i] = uint64(idx)
 
 			case []float32:
@@ -242,7 +242,7 @@ func (e *ExecutionEngine) CallInf(caller []byte, code []byte, input []interface{
 						idx = offset
 					}
 				}
-				vm.GetMemory().MemPoints[uint64(idx)] = &memory.TypeLength{Ptype: memory.P_FLOAT32, Length: len(param.([]float32)) * 4}
+				vm.GetMemory().MemPoints[uint64(idx)] = &memory.TypeLength{Ptype: memory.PFloat32, Length: len(param.([]float32)) * 4}
 				params[i] = uint64(idx)
 			case []float64:
 				idx := 0
@@ -255,7 +255,7 @@ func (e *ExecutionEngine) CallInf(caller []byte, code []byte, input []interface{
 						idx = offset
 					}
 				}
-				vm.GetMemory().MemPoints[uint64(idx)] = &memory.TypeLength{Ptype: memory.P_FLOAT64, Length: len(param.([]float64)) * 8}
+				vm.GetMemory().MemPoints[uint64(idx)] = &memory.TypeLength{Ptype: memory.PFloat64, Length: len(param.([]float64)) * 8}
 				params[i] = uint64(idx)
 			}
 		}

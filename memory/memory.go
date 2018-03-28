@@ -30,14 +30,14 @@ type PType int
 
 const (
 	PInt8 PType = iota
-	Pint16
-	Pint32
-	Pint64
+	PInt16
+	PInt32
+	PInt64
 	PFloat32
 	PFloat64
 	PString
 	PStruct
-	PUnkown
+	PUnknown
 )
 
 type TypeLength struct {
@@ -152,7 +152,7 @@ func (vm *VMmemory) SetPointerMemory(val interface{}) (int, error) {
 				binary.LittleEndian.PutUint32(tmp, uint32(v))
 				copy(intBytes[i*4:(i+1)*4], tmp)
 			}
-			return vm.copyMemAndGetIdx(intBytes, Pint32)
+			return vm.copyMemAndGetIdx(intBytes, PInt32)
 		case []int64:
 			intBytes := make([]byte, len(val.([]int))*8)
 			for i, v := range val.([]int) {
@@ -160,7 +160,7 @@ func (vm *VMmemory) SetPointerMemory(val interface{}) (int, error) {
 				binary.LittleEndian.PutUint64(tmp, uint64(v))
 				copy(intBytes[i*8:(i+1)*4], tmp)
 			}
-			return vm.copyMemAndGetIdx(intBytes, Pint64)
+			return vm.copyMemAndGetIdx(intBytes, PInt64)
 
 		case []float32:
 			floatBytes := make([]byte, len(val.([]float32))*4)
