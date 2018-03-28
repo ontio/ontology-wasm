@@ -67,7 +67,7 @@ func newStack(depth int) *vmstack {
 	return &vmstack{top: 0, stack: make([]*VM, depth)}
 }
 
-//todo add parameters
+//create new ExecutionEngine
 func NewExecutionEngine(iservice IInteropService, ver string) *ExecutionEngine {
 
 	engine := &ExecutionEngine{
@@ -192,13 +192,6 @@ func (e *ExecutionEngine) CallInf(caller []byte, code []byte, input []interface{
 					return nil, err
 				}
 				params[i] = uint64(offset)
-
-				/*				offset, err := vm.SetMemory(param)
-								if err != nil {
-									return nil, err
-								}
-								vm.GetMemory().MemPoints[uint64(offset)] = &memory.TypeLength{Ptype:memory.P_STRING,Length:len(param.(string))}
-								params[i] = uint64(offset)*/
 			case int:
 				params[i] = uint64(param.(int))
 			case int64:
@@ -297,10 +290,6 @@ func (e *ExecutionEngine) CallInf(caller []byte, code []byte, input []interface{
 func (e *ExecutionEngine) GetMemory() *memory.VMmemory {
 	return e.vm.memory
 }
-
-//func (e *ExecutionEngine)GetMemStruct() *memory.VMmemory{
-//	return e.memory
-//}
 
 func (e *ExecutionEngine) Create(caller []byte, code []byte) ([]byte, error) {
 	return code, nil
@@ -501,7 +490,7 @@ func (e *ExecutionEngine) Call(caller []byte, code, input []byte) (returnbytes [
 
 }
 
-//TODO NOT IN USE BUT DON'T DELETE IT
+//FIXME NOT IN USE BUT DON'T DELETE IT
 //current we only support the ONT SYSTEM module import
 //other imports will raise an error
 func importer(name string) (*wasm.Module, error) {

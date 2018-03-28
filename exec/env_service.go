@@ -68,7 +68,6 @@ func NewInteropService() *InteropService {
 	service.Register("JsonUnmashal", jsonUnmashal)
 	service.Register("JsonMashal", jsonMashal)
 
-	//===================add block apis below==================
 	return &service
 }
 
@@ -106,7 +105,6 @@ func (i *InteropService) GetServiceMap() map[string]func(*ExecutionEngine) (bool
 	return i.serviceMap
 }
 
-//******************* basic functions ***************************
 //TODO decide to replace the P_UNKNOW type
 
 //for the c language "calloc" function
@@ -182,7 +180,7 @@ func arrayLen(engine *ExecutionEngine) (bool, error) {
 		case memory.P_INT64, memory.P_FLOAT64:
 			result = uint64(tl.Length / 8)
 		case memory.P_UNKNOW:
-			//todo assume it's byte
+			//FIXME assume it's byte
 			result = uint64(tl.Length / 1)
 		default:
 			result = uint64(0)

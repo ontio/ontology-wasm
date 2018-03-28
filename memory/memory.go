@@ -26,22 +26,22 @@ import (
 	"reflect"
 )
 
-type P_Type int
+type PType int
 
 const (
-	P_INT8 P_Type = iota
-	P_INT16
-	P_INT32
-	P_INT64
-	P_FLOAT32
-	P_FLOAT64
-	P_STRING
-	P_STRUCT
-	P_UNKNOW
+	PInt8 PType = iota
+	Pint16
+	Pint32
+	Pint64
+	PFloat32
+	PFloat64
+	PString
+	PStruct
+	PUnkown
 )
 
 type TypeLength struct {
-	Ptype  P_Type
+	Ptype  PType
 	Length int
 }
 
@@ -71,7 +71,7 @@ func (vm *VMmemory) Malloc(size int) (int, error) {
 	return offset, nil
 }
 
-func (vm *VMmemory) MallocPointer(size int, p_type P_Type) (int, error) {
+func (vm *VMmemory) MallocPointer(size int, p_type PType) (int, error) {
 	if vm.Memory == nil || len(vm.Memory) == 0 {
 		return 0, errors.New("memory is not initialized")
 	}
@@ -86,7 +86,7 @@ func (vm *VMmemory) MallocPointer(size int, p_type P_Type) (int, error) {
 	return offset, nil
 }
 
-func (vm *VMmemory) copyMemAndGetIdx(b []byte, p_type P_Type) (int, error) {
+func (vm *VMmemory) copyMemAndGetIdx(b []byte, p_type PType) (int, error) {
 	idx, err := vm.MallocPointer(len(b), p_type)
 	if err != nil {
 		return 0, err
@@ -135,7 +135,7 @@ func (vm *VMmemory) SetPointerMemory(val interface{}) (int, error) {
 	switch reflect.TypeOf(val).Kind() {
 	case reflect.String:
 		b := []byte(val.(string))
-		return vm.copyMemAndGetIdx(b, P_STRING)
+		return vm.copyMemAndGetIdx(b, PString)
 	case reflect.Array, reflect.Struct, reflect.Ptr:
 
 		//todo  implement
@@ -143,7 +143,7 @@ func (vm *VMmemory) SetPointerMemory(val interface{}) (int, error) {
 	case reflect.Slice:
 		switch val.(type) {
 		case []byte:
-			return vm.copyMemAndGetIdx(val.([]byte), P_STRING)
+			return vm.copyMemAndGetIdx(val.([]byte), PString)
 
 		case []int:
 			intBytes := make([]byte, len(val.([]int))*4)
@@ -152,7 +152,7 @@ func (vm *VMmemory) SetPointerMemory(val interface{}) (int, error) {
 				binary.LittleEndian.PutUint32(tmp, uint32(v))
 				copy(intBytes[i*4:(i+1)*4], tmp)
 			}
-			return vm.copyMemAndGetIdx(intBytes, P_INT32)
+			return vm.copyMemAndGetIdx(intBytes, Pint32)
 		case []int64:
 			intBytes := make([]byte, len(val.([]int))*8)
 			for i, v := range val.([]int) {
@@ -160,7 +160,7 @@ func (vm *VMmemory) SetPointerMemory(val interface{}) (int, error) {
 				binary.LittleEndian.PutUint64(tmp, uint64(v))
 				copy(intBytes[i*8:(i+1)*4], tmp)
 			}
-			return vm.copyMemAndGetIdx(intBytes, P_INT64)
+			return vm.copyMemAndGetIdx(intBytes, Pint64)
 
 		case []float32:
 			floatBytes := make([]byte, len(val.([]float32))*4)
@@ -168,7 +168,7 @@ func (vm *VMmemory) SetPointerMemory(val interface{}) (int, error) {
 				tmp := util.Float32ToByte(v)
 				copy(floatBytes[i*4:(i+1)*4], tmp)
 			}
-			return vm.copyMemAndGetIdx(floatBytes, P_FLOAT32)
+			return vm.copyMemAndGetIdx(floatBytes, PFloat32)
 
 		case []float64:
 			floatBytes := make([]byte, len(val.([]float64))*4)
@@ -176,7 +176,7 @@ func (vm *VMmemory) SetPointerMemory(val interface{}) (int, error) {
 				tmp := util.Float64ToByte(v)
 				copy(floatBytes[i*8:(i+1)*8], tmp)
 			}
-			return vm.copyMemAndGetIdx(floatBytes, P_FLOAT64)
+			return vm.copyMemAndGetIdx(floatBytes, PFloat64)
 
 		default:
 			return 0, errors.New("Not supported slice type")
