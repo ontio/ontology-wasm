@@ -52,6 +52,6 @@ func NewExecutionEngine(iservice IInteropService, ver string) *ExecutionEngine {
 
 We already put same apis in ```env_service.go```
 
-**ver** represent the version of engine, you can use this field to decide how to deserialize your parameters.
+**ver** represents the version of engine, you can use this field to decide how to deserialize your parameters.
 
-You can checkout the tests in ```exec/engine_test.go```
+You can try the tests in ```exec/engine_test.go``` and smart contract tests in ```exec/contract_test.go```
