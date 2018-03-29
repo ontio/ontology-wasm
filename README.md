@@ -62,7 +62,7 @@ Then load the wasm module(from a file or other stream)
 
 Pass the Parameters (Json format for example)
 ```go
-    par := make([]Param, 2)
+	par := make([]Param, 2)
 	par[0] = Param{Ptype: "int", Pval: "20"}
 	par[1] = Param{Ptype: "int", Pval: "30"}
 
@@ -72,14 +72,14 @@ Pass the Parameters (Json format for example)
 		fmt.Println(err)
 		t.Fatal(err.Error())
 	}
-    bf := bytes.NewBufferString("add")
-    bf.WriteString("|")
-    bf.Write(jbytes)
+	bf := bytes.NewBufferString("add")
+	bf.WriteString("|")
+	bf.Write(jbytes)
 
 ```
 Execute the wasm vm 
 ```go
-    res, err := engine.Call(nil, code, bf.Bytes())
+    	res, err := engine.Call(nil, code, bf.Bytes())
 	if err != nil {
 		fmt.Println("call error!", err.Error())
 	}
@@ -87,7 +87,7 @@ Execute the wasm vm
 
 If you know the result is not a basic type(int,int64,float or double),you should get the data from memory
 ```go
-    retbytes, err := engine.vm.GetPointerMemory(uint64(binary.LittleEndian.Uint32(res)))
+    	retbytes, err := engine.vm.GetPointerMemory(uint64(binary.LittleEndian.Uint32(res)))
 	if err != nil {
 		fmt.Println(err)
 		t.Fatal("errors:" + err.Error())
