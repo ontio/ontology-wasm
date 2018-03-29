@@ -55,3 +55,6 @@ We already put some apis in ```env_service.go```
 **ver** represents the version of engine, you can use this field to decide how to deserialize your parameters.
 
 You can try the tests in ```exec/engine_test.go``` and smart contract tests in ```exec/contract_test.go```
+
+## Ontology Smart contract
+Please  refer to [smart-contract-tutorial](https://github.com/ontio/documentation/tree/master/smart-contract-tutorial)
