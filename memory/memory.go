@@ -21,9 +21,10 @@ package memory
 import (
 	"encoding/binary"
 	"errors"
-	"github.com/ontio/ontology-wasm/util"
 	"math"
 	"reflect"
+
+	"github.com/ontio/ontology-wasm/util"
 )
 
 type PType int

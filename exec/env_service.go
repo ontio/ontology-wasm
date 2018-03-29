@@ -23,9 +23,10 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"errors"
-	"github.com/ontio/ontology-wasm/memory"
 	"strconv"
 	"strings"
+
+	"github.com/ontio/ontology-wasm/memory"
 )
 
 type Args struct {

@@ -21,10 +21,11 @@ package exec
 import (
 	"encoding/binary"
 	"fmt"
-	"github.com/ontio/ontology-wasm/util"
 	"io/ioutil"
 	"math"
 	"testing"
+
+	"github.com/ontio/ontology-wasm/util"
 )
 
 var service = NewInteropService()

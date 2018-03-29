@@ -23,13 +23,14 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"math"
+	"os"
+	"reflect"
+
 	"github.com/ontio/ontology-wasm/memory"
 	"github.com/ontio/ontology-wasm/util"
 	"github.com/ontio/ontology-wasm/validate"
 	"github.com/ontio/ontology-wasm/wasm"
-	"math"
-	"os"
-	"reflect"
 )
 
 const (
