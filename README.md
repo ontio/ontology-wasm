@@ -50,7 +50,7 @@ func NewExecutionEngine(iservice IInteropService, ver string) *ExecutionEngine {
 
 **service** contains the system apis which exists in the "import 'env' " section, that means you can create any api calls implemented by golang code.
 
-We already put same apis in ```env_service.go```
+We already put some apis in ```env_service.go```
 
 **ver** represents the version of engine, you can use this field to decide how to deserialize your parameters.
 
