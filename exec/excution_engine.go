@@ -155,10 +155,6 @@ func (e *ExecutionEngine) CallInf(caller []byte, code []byte, input []interface{
 
 	vm.SetMessage(message)
 
-	vm.Caller = caller
-	//todo hash code
-	vm.CodeHash = code
-
 	entry, ok := m.Export.Entries[methodName]
 	if ok == false {
 		return nil, errors.New("Method:" + methodName + " does not exist!")
@@ -345,10 +341,6 @@ func (e *ExecutionEngine) Call(caller []byte, code, input []byte) (returnbytes [
 		vm.Engine = e
 		//no message support for now
 		// vm.SetMessage(message)
-
-		vm.Caller = caller
-		//todo hashcode
-		vm.CodeHash = code
 
 		entry, ok := m.Export.Entries[methodName]
 		if ok == false {

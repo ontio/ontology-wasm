@@ -1,21 +1,3 @@
-/*
- * Copyright (C) 2018 The ontology Authors
- * This file is part of The ontology library.
- *
- * The ontology is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * The ontology is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with The ontology.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 // Copyright 2017 The go-interpreter Authors.  All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
@@ -24,17 +6,18 @@
 package exec
 
 import (
+	"bytes"
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"math"
 
-	"bytes"
-	"fmt"
-	"github.com/ontio/ontology-wasm/disasm"
 	"github.com/ontio/ontology-wasm/exec/internal/compile"
 	"github.com/ontio/ontology-wasm/memory"
 	"github.com/ontio/ontology-wasm/wasm"
 	ops "github.com/ontio/ontology-wasm/wasm/operators"
+	"github.com/ontio/ontology-wasm/disasm"
+	"github.com/ontio/ontology/common"
 )
 
 var (
@@ -99,8 +82,6 @@ type VM struct {
 	//store the env call parameters
 	envCall *EnvCall
 	//store a engine pointer
-	CodeHash []byte
-	Caller   []byte
 	Engine   *ExecutionEngine
 }
 
@@ -351,10 +332,8 @@ func (vm *VM) ExecCode(insideCall bool, fnIndex int64, args ...uint64) (interfac
 	for i, arg := range args {
 		vm.ctx.locals[i] = arg
 	}
-
 	var rtrn interface{}
 	res := vm.execCode(insideCall, compiled)
-
 	// for the call contract case
 	if insideCall {
 		return res, nil
@@ -462,7 +441,7 @@ outer:
 }
 
 //start a new vm
-func (vm *VM) CallProductContract(module *wasm.Module, actionName []byte, arg []byte) (uint64, error) {
+func (vm *VM) CallContract(caller common.Address, contractAddress common.Address, module *wasm.Module, actionName []byte, arg []byte) (uint64, error) {
 
 	methodName := CONTRACT_METHOD_NAME
 
@@ -474,16 +453,13 @@ func (vm *VM) CallProductContract(module *wasm.Module, actionName []byte, arg []
 
 	//get entry index
 	index := int64(entry.Index)
-	//get function index
-	//fidx := module.Function.Types[int(index)]
-	//get  function type
-	//ftype := module.Types.Entries[int(fidx)]
 
 	//new vm
 	newvm, err := NewVM(module)
 	if err != nil {
 		return uint64(0), err
 	}
+
 	newvm.Services = vm.Services
 
 	engine := vm.Engine
@@ -499,7 +475,6 @@ func (vm *VM) CallProductContract(module *wasm.Module, actionName []byte, arg []
 	if err != nil {
 		return uint64(0), err
 	}
-
 	res, err := newvm.ExecCode(true, int64(index), uint64(actionIdx), uint64(argIdx))
 	if err != nil {
 		return uint64(0), err
@@ -516,47 +491,6 @@ func (vm *VM) CallProductContract(module *wasm.Module, actionName []byte, arg []
 	}
 
 	return uint64(idx), nil
-}
-
-//todo implement the "call other contract function"
-//this is for the "test" version call
-func (vm *VM) CallContract(module *wasm.Module, methodName string, args ...uint64) (uint64, error) {
-
-	//1. exec the method code
-	entry, ok := module.Export.Entries[methodName]
-	if ok == false {
-		return uint64(0), errors.New("Method:" + methodName + " does not exist!")
-	}
-
-	//get entry index
-	index := int64(entry.Index)
-	//get function index
-	fidx := module.Function.Types[int(index)]
-	//get  function type
-	ftype := module.Types.Entries[int(fidx)]
-
-	if len(ftype.ParamTypes) != len(args) {
-		return uint64(0), errors.New("parameter count is not right")
-	}
-	//new vm
-	newvm, err := NewVM(module)
-	if err != nil {
-		return uint64(0), err
-	}
-	newvm.Services = vm.Services
-
-	vm.Engine.vm = newvm
-	newvm.Engine = vm.Engine
-
-	res, err := newvm.ExecCode(true, int64(index), args...)
-
-	//todo copy memory if need!!!
-	//fmt.Printf("CallContract res is %v\n ",res)
-	//2 copy memory if need!!!
-
-	vm.Engine.vm = vm
-
-	return res.(uint64), nil
 }
 
 func (vm *VM) loadModule(module *wasm.Module) error {
@@ -579,7 +513,7 @@ func (vm *VM) loadModule(module *wasm.Module) error {
 		vm.memory.Memory = make([]byte, 1*wasmPageSize)
 	}
 
-	vm.memory.AllocedMemIdex = -1 //init the allocated memory offset
+	//vm.memory.AllocedMemIdex = -1 //init the allocated memory offset
 
 	vm.memory.MemPoints = make(map[uint64]*memory.TypeLength) //init the pointer map
 
@@ -606,21 +540,23 @@ func (vm *VM) loadModule(module *wasm.Module) error {
 				var tmpoffset = int(offset)
 				for _, tmp := range splited {
 					vm.memory.MemPoints[uint64(tmpoffset)] = &memory.TypeLength{Ptype: memory.PString, Length: len(tmp) + 1}
-					//vm.memory.AllocedMemIdex = int(tmpoffset)+len(tmp) +1
 					tmpoffset += len(tmp) + 1
 				}
 			} else {
 				vm.memory.MemPoints[uint64(offset)] = &memory.TypeLength{Ptype: memory.PString, Length: len(entry.Data)}
-				//vm.memory.AllocedMemIdex = int(offset)+len(entry.Data)
 			}
 		}
 		//
-		vm.memory.PointedMemIndex = tmpIdx + 1
+		vm.memory.AllocedMemIdex = tmpIdx
+		vm.memory.PointedMemIndex = (len(vm.memory.Memory) + tmpIdx) / 2
 	} else {
 		//default pointed memory
 		//todo define the magic number
+		vm.memory.AllocedMemIdex = -1
 		vm.memory.PointedMemIndex = len(vm.memory.Memory) / 2 //the second half memory is reserved for the pointed objects,string,array,structs
 	}
+
+	//vm.memory.AllocedMemIdex = -1 //init the allocated memory offset
 
 	vm.compiledFuncs = make([]compiledFunction, len(module.FunctionIndexSpace))
 	vm.globals = make([]uint64, len(module.GlobalIndexSpace))
