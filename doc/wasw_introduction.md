@@ -130,9 +130,28 @@ char * hello(char * name){
 
 假如我们的传入参数为 "Alice",则我们需要在调用hello函数之前，将 "Alice"设置在export 的内存中，并将其地址(偏移量)传入到wasm中。
 
-问题，如何将传入的字符串设置到内存中？
+问题是：如何将传入的字符串设置到内存中？
 
-1. ​
+在浏览器环境下，可以通过JavaScript直接设置，本文不讨论关于WebAssembly在浏览器环境下的使用，类似于Javascript，在ontology-wasm vm中内存是一个可以暴露出来的[]byte，这样我们就可以把参数的字符串转换成[]byte并拷贝到内存[]byte中，并将首地址传入WebAssembly函数，如果是WebAssembly 函数返回的字符串，我们同样可以根据返回的地址在内存中得到实际的字符串。
+
+现在看起来我们已经可以使用这个WebAssembly VM了，但是仍然存在一些问题：
+
+1. 不同的编译器对常量字符串在内存中的初始化位置并不相同：如Fiddle是从16开始，而 Emscripten由memoryBase这个传入的global 参数指定。
+
+2. 复杂的类型，如struct
+
+   ```c
+   struct Example {
+       char * name;
+       char * gender;
+       int age;
+   };
+   struct Example * p;
+   ```
+
+   当我们需要使用上例的struct 时，就需要为它分配相应的内存：
+
+   ![memory1](images/memory1.png)
 
 
 
@@ -140,6 +159,64 @@ char * hello(char * name){
 
 ### 管理内存
 
+由于WebAssembly VM使用的并不是真正的物理内存，需要我们自己来实现```malloc```和```calloc```实现对虚拟机内存的分配和管理（ontology-wasm 作为智能合约的执行器，并不需要长时间的持续运行，所以暂时没有加入```free()```操作，如果有需要，通过调整内存的页数来增大内存）。
+
+我们将内存分成3个区域：
+
+![memory](images/memory.png)
+
+1. Const Area：保存初始化的常量，从index 16开始，地址0作为NULL的标识。
+
+2. Basic Area ：保存基本类型的数据
+
+3. Complex Area ：保存复杂类型数据，如struct, array 等。
+
+   ​
+
+每次分配内存后，我们需要记录本次分配的信息：
+
+```go
+MemPoints       map[uint64]*TypeLength
+```
+
+```go
+const (
+	PInt8 PType = iota
+	PInt16
+	PInt32
+	PInt64
+	PFloat32
+	PFloat64
+	PString
+	PStruct
+	PUnkown
+)
+
+type TypeLength struct {
+	Ptype  PType
+	Length int
+}
+
+```
+
+key 为本次分配的内存地址，value为本次分配的类型和分配内存的总长度 ，这样我们就可以很容易的根据内存地址来得到实际对应的值的信息。
+
 
 
 ### 外部函数
+
+WebAssembly支持引入其他的WebAssembly 模块以调用其中的函数，只需要指定需要调用模块路径即可，如果在本模块内调用的函数并没有具体的实现，就会默认的被认为是从 env中导入。
+
+这样，我们就可以通过注册env 的函数来方便的调用native 方法， 如：
+
+```
+(import "env" "concat" (func $concat (param i32 i32) (result i32)))
+```
+
+我们就可以很方便的以golang来实现这个concat方法，从内存中取得两个字符串，拼接成新的字符串并为其分配和放入内存中，再将结果的地址压入执行栈中。
+
+ontology-wasm vm 实现了一些基本的操作，请参考 [Ontology Wasm API list](https://github.com/ontio/documentation/blob/master/smart-contract-tutorial/wasm_api.md)
+
+
+
+至此，我们就可以实现一个简单的基于WebAssembly的区块链智能合约执行虚拟机，随着WebAssembly标准的更新，我们也会持续为
