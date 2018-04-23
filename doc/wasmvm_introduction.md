@@ -219,4 +219,4 @@ ontology-wasm vm 实现了一些基本的操作，请参考 [Ontology Wasm API l
 
 
 
-至此，我们就可以实现一个简单的基于WebAssembly的区块链智能合约执行虚拟机，随着WebAssembly标准的更新，我们也会持续为
+至此，我们就可以实现一个简单的基于WebAssembly的区块链智能合约执行虚拟机，随着WebAssembly标准的更新，我们也会持续为ontology wasmvm 添加更多更强大的功能。
