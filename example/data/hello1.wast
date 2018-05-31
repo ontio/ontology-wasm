@@ -1,0 +1,16 @@
+(module
+ (type $FUNCSIG$i (func (result i32)))
+ (type $FUNCSIG$iii (func (param i32 i32) (result i32)))
+ (import "env" "strconcat" (func $strconcat (param i32 i32) (result i32)))
+ (table 0 anyfunc)
+ (memory $0 1)
+ (data (i32.const 16) "hello \00")
+ (export "memory" (memory $0))
+ (export "hello" (func $hello))
+ (func $hello (; 1 ;) (param $0 i32) (result i32)
+  (call $strconcat
+   (i32.const 16)
+   (get_local $0)
+  )
+ )
+)
