@@ -754,12 +754,6 @@ func rawMashalParams(engine *ExecutionEngine) (bool, error) {
 }
 //trim the '\00' byte
 func TrimBuffToString(bytes []byte) string {
-
-	for i, b := range bytes {
-		if b == 0 {
-			return string(bytes[:i])
-		}
-	}
-	return string(bytes)
+	return strings.Replace(string(bytes),"\u0000","",-1)
 
 }
