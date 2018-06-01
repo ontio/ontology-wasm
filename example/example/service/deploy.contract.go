@@ -1,6 +1,0 @@
-package storage
-
-
-func DeployContract () {
-
-}
